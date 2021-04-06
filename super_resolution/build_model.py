@@ -25,13 +25,12 @@ class ModelBuilder:
         self.model = self._build_model()
         opt = optimizer()
 
-        self.model.compile(optimizer=opt, loss='binary_crossentropy', metrics=['accuracy'])
+        self.model.compile(optimizer=opt, loss='mae', metrics=['accuracy'])
 
-    def model_train(self, is_save:bool = False, x_train = None,
-                    y_train = None, x_test = None, y_test = None):
+    def model_train(self, x_train = None, y_train = None):
 
         # compile first
-        self.model.fit(x_train, y_train, epochs=cfg.EPOCHS, batch_size=cfg.BATCH_SIZE)
+        self.model.fit(x_train, validation_data = y_train, epochs=cfg.EPOCHS, steps_per_epoch=cfg.SPE, validation_steps=cfg.VS)
 
 
     def _summary(self):
@@ -62,22 +61,21 @@ class ModelBuilder:
 
     def _denormalize(self, x):
 
-        return x * self.std_df + self.mean_df
+        return [x * self.std_df + value for value in self.mean_df]
 
 
     def _add_conv(self, x, name:str,\
                   filters: int=32,\
-                  size: tuple = (3, 3),\
+                  size: tuple = 3,\
                   strides: tuple = (1,1),\
                   padding: str = 'same'):
 
-        return Conv2D(filters, size, strides, padding, name=name)(x)
+        return Conv2D(filters = filters, kernel_size = size, strides = strides, padding = padding, name=name)(x)
 
 
     def _add_resblock(self, x, block_num: int, batchQ: bool = True, activation_layer: Callable = ReLU):
 
         X_shortcut = x
-        print (X_shortcut)
         X = self._add_conv(x, strides = (1, 1), name=f'ConvLayer_{block_num}')
 
         if batchQ:
@@ -94,7 +92,7 @@ class ModelBuilder:
 
 
         X = Lambda(self._normalize)(x)
-        X = self._add_conv(x, name=f'Convolution_layer_0')
+        X = self._add_conv(X, name=f'Convolution_layer_0')
 
         for i in range(cfg.RES_NUM):
 
@@ -104,35 +102,21 @@ class ModelBuilder:
 
 
     def _add_upscale(self, name:str,\
-                  filters: int=1,\
-                  size: tuple = (4, 4),\
-                  strides: tuple = (2,2),
+                  filters: int=3,\
+                  size: tuple = 4,\
+                  strides: tuple = (4,4),
                   padding: str = 'same'):
 
         return Conv2DTranspose(filters, size, strides, name=name, padding=padding)
 
-    # @staticmethod
-    # def _counter(func):
-    #     def wrapper(*args, **kwargs):
 
-    #         wrapper.calls += 1
-    #         res = func(args, kwargs)
-
-    #         return res
-        
-    #     wrapper.calls = 0
-
-    #     return wrapper
-
-
-    # @ModelBuilder._counter
     def _linear_part(self, x):
         
         X = self._add_upscale(name = f'UPSACLE_LAYER_0')(x)
 
         for i in range(cfg.CONV_NUM):
 
-            X = self._add_conv(X, name = f'Linear_Part_Conv_Layer_{i}')
+            X = self._add_conv(X, name = f'Linear_Part_Conv_Layer_{i}', filters=3)
 
         X = Lambda(self._denormalize)(X)
 
