@@ -4,9 +4,11 @@ from keras.layers import Conv2DTranspose, BatchNormalization, ReLU
 from keras.models import Model
 from keras.models import load_model
 from keras.optimizers import Adam
+from keras.callbacks import ModelCheckpoint
 import config as cfg
 from typing import Callable
 import numpy as np
+from keras.optimizers.schedules import PiecewiseConstantDecay
 
 
 
@@ -20,18 +22,38 @@ class ModelBuilder:
         self.model = None
 
 
-    def compile(self, optimizer: callable = Adam, lr: float = cfg.LEARNING_RATE):
+    def compile(self, optimizer: Callable = Adam, lr: float = cfg.LEARNING_RATE):
 
         self.model = self._build_model()
-        opt = optimizer()
+        opt = optimizer(self._learning_rate())
 
         self.model.compile(optimizer=opt, loss='mae', metrics=['accuracy'])
 
     def model_train(self, x_train = None, y_train = None):
 
-        # compile first
-        self.model.fit(x_train, validation_data = y_train, epochs=cfg.EPOCHS, steps_per_epoch=cfg.SPE, validation_steps=cfg.VS)
+        callbacks = self._create_check_point()
 
+        # compile first
+        self.model.fit(x_train, validation_data = y_train, epochs=cfg.EPOCHS, 
+                        steps_per_epoch=cfg.SPE, validation_steps=cfg.VS,
+                        callbacks=callbacks)
+
+
+    def _create_check_point(self):
+
+        filepath = 'my_best_model.epoch{epoch:02d}-loss{val_loss:.2f}.hdf5'
+        checkpoint = ModelCheckpoint(filepath=filepath, 
+                             monitor='val_loss',
+                             verbose=1, 
+                             save_best_only=True,
+                             mode='min')
+
+        return [checkpoint]
+
+        
+    def _learning_rate(self):
+
+        return PiecewiseConstantDecay(boundaries=cfg.BOUNDARIES, values=cfg.VALUES)
 
     def _summary(self):
 
@@ -73,7 +95,7 @@ class ModelBuilder:
         return Conv2D(filters = filters, kernel_size = size, strides = strides, padding = padding, name=name)(x)
 
 
-    def _add_resblock(self, x, block_num: int, batchQ: bool = True, activation_layer: Callable = ReLU):
+    def _add_resblock(self, x, block_num: int, batchQ: bool = cfg.BATCHNORM, activation_layer: Callable = ReLU):
 
         X_shortcut = x
         X = self._add_conv(x, strides = (1, 1), name=f'ConvLayer_{block_num}')
@@ -90,19 +112,21 @@ class ModelBuilder:
 
     def _non_linear_part(self, x):
 
-
         X = Lambda(self._normalize)(x)
         X = self._add_conv(X, name=f'Convolution_layer_0')
+        through_shortcut = X
 
         for i in range(cfg.RES_NUM):
 
             X = self._add_resblock(x = X, block_num = i)
 
+        X = Add()([X, through_shortcut])
+
         return X
 
 
     def _add_upscale(self, name:str,\
-                  filters: int=3,\
+                  filters: int=48,\
                   size: tuple = 4,\
                   strides: tuple = (4,4),
                   padding: str = 'same'):
@@ -157,7 +181,8 @@ class ModelBuilder:
     MODEL LOAD+
     GET_UPSACLE_PIC+
     LOSS??
-    DATA LOADER 
+    DATA LOADER
+    ESRGAN
     """
 
         

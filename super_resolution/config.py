@@ -1,14 +1,22 @@
+from typing import Union
+
 ####################EXPERIMENTS#######################
 
-CONV_NUM = 2
-RES_NUM = 8
-INPUT_SHAPE = (None, None, 3)
-LEARNING_RATE = 0.00001
-EPOCHS = 100
-BATCH_SIZE = 32
+CONV_NUM: int = 2
+RES_NUM: int = 6
+INPUT_SHAPE: Union[None, int]  = (None, None, 3)
+LEARNING_RATE: float = 0.00001
+EPOCHS: int = 100
+BATCH_SIZE: int = 64
+BATCHNORM: bool = False
 
-MEAN = [value * 255 for value in [0.4488, 0.4371, 0.4040]]
-STD = 127.5
+MEAN: list = [value * 255 for value in [0.4488, 0.4371, 0.4040]]
+STD: float = 127.5
 
-SPE = 3000
-VS = 10
+SPE: int = 300
+VS: int = 10
+
+#######################LEARNING_RATES###################
+
+BOUNDARIES: list = [3000]
+VALUES: list = [1e-4, 5e-5]
