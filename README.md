@@ -13,3 +13,4 @@ that project is still in development
 2. Add perceptual loss function
 3. fihish a learning proccess
 4. try to use leaky RELU as an activation function
+5. Add docstrings, type hints and annotations, 
