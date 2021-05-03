@@ -39,14 +39,20 @@ class ModelBuilder:
                         callbacks=callbacks)
 
 
+    def load_wheights(self, path:str) -> None:
+
+        self.model.load_weights(path)  
+
+
     def _create_check_point(self):
 
-        filepath = 'my_best_model.epoch{epoch:02d}-loss{val_loss:.2f}.hdf5'
+        filepath = 'weights/sr_model_epoch{epoch:02d}.hdf5'
         checkpoint = ModelCheckpoint(filepath=filepath, 
                              monitor='val_loss',
                              verbose=1, 
                              save_best_only=True,
-                             mode='min')
+                             mode='min',
+                             save_freq=int(cfg.PERIOD * cfg.SPE))
 
         return [checkpoint]
 
@@ -71,7 +77,7 @@ class ModelBuilder:
             print ("Test Accuracy = " + str(preds[1]))
             
 
-    def _model_save(self, path: str = "./models"):
+    def model_save(self, path: str = "./models"):
 
         self.model.save(path)
 
@@ -96,7 +102,6 @@ class ModelBuilder:
 
 
     def _add_resblock(self, x, block_num: int, batchQ: bool = cfg.BATCHNORM, activation_layer: Callable = ReLU):
-
         X_shortcut = x
         X = self._add_conv(x, strides = (1, 1), name=f'ConvLayer_{block_num}')
 
@@ -165,9 +170,9 @@ class ModelBuilder:
 
         return load_model(model_name)
 
-    def predict(self, data, model):
+    def predict(self, data):
 
-        model.predict(data)
+        return self.model.predict(data)
 
     #TODO
     """

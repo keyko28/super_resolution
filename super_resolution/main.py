@@ -10,5 +10,10 @@ model.compile()
 model._summary()
 model.model_train(X_train, X_test)
 
+# save_results
+model.model_save()
+
+
+
 
 

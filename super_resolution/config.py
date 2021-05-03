@@ -13,8 +13,9 @@ BATCHNORM: bool = False
 MEAN: list = [value * 255 for value in [0.4488, 0.4371, 0.4040]]
 STD: float = 127.5
 
-SPE: int = 300
+SPE: int = 1000
 VS: int = 10
+PERIOD: int = 10
 
 #######################LEARNING_RATES###################
 
