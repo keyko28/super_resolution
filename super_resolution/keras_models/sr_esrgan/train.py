@@ -32,9 +32,13 @@ def train(epochs: int, str, paths: list, model_save_dir: str, batch_size: int = 
     loss_file = open(model_save_dir + 'losses_info.txt', 'w+')
     loss_file.close()
 
+    #losses
+    gan_loss = None
+    discriminator_loss = None
+
     for epoch in range(epochs):
 
-        stdout_write(['~'*15, f'Epoch: {epoch}', '~'*15, '\n'])
+        stdout_write(['~'*20, f'Epoch: {epoch}', '~'*20, '\n'])
 
         for _ in tqdm(range(batch_count)):
 
@@ -75,7 +79,7 @@ def train(epochs: int, str, paths: list, model_save_dir: str, batch_size: int = 
         stdout_write([f'discriminator loss: {discriminator_loss}'])
         stdout_write([f'gan loss: {gan_loss}'])
 
-        with open (model_save_dir + 'losses.txt', a) as f:
+        with open (model_save_dir + 'losses.txt', 'a') as f:
             f.write(f'epoch: {epoch}: gan_loss: {gan_loss}; discriminator loss: {discriminator_loss}')
 
         if epoch % 5 == 0:

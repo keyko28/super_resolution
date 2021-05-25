@@ -35,7 +35,7 @@ def load_train_images_names(lr_train_path: str,
 
 def get_data(images: List[str]) -> object:
 
-        return map(lambda x: normalize(np.array(Image.open(x))), images)
+        return map(lambda x: np.expand_dims(normalize(np.array(Image.open(x))), axis=0), images)
 
 
 def stdout_write(message: List[str]) -> None:
@@ -46,14 +46,14 @@ def stdout_write(message: List[str]) -> None:
 
 def generator_predict(generator_model: Generator, images: List[np.ndarray]):
         
-        predictions: list = []
+        predictions: list = [generator_model.predict(image) for image in images]
 
-        for image in images:
+        # for image in images:
 
-                image = np.expand_dims(image, axis=0)
-                image = AveragePooling2D(2)(image)
+        #         image = np.expand_dims(image, axis=0)
+        #         image = AveragePooling2D(2)(image)
 
-                predictions.append(generator_model.predict(image))
+        #         predictions.append()
 
         return predictions
 

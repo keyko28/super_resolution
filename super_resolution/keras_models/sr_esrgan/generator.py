@@ -58,7 +58,7 @@ class Generator:
 
         for i in range(self.upsampling_blocks):
 
-            X = self._add_upsampling_block(x= X, num=i, filters=64, size=3, padding='same', strides=1)
+            X = self._add_upsampling_block(x= X, num=i, filters=256, size=3, padding='same', strides=1)
 
         X = self._add_conv(x = X, filters=3, size = 9, strides=1, name = 'final_conv')
 
@@ -103,7 +103,7 @@ class Generator:
 
 
     def _add_upscale(self, name:str,\
-                  filters: int=24, # 48
+                  filters: int=48, # 48
                   size: tuple = 4, 
                   strides: tuple = (4,4),
                   padding: str = 'same'):
@@ -125,8 +125,8 @@ class Generator:
         self.model.summary()
 
     
-# m = Generator(mean_df = cfg.MEAN, std_df = cfg.STD)
-# m._build_gen()
-# m._summary()
+m = Generator(mean_df = cfg.MEAN, std_df = cfg.STD)
+m._build_gen()
+m._summary()
 
 

@@ -5,7 +5,7 @@ from tensorflow.python.keras.backend_config import _EPSILON
 ####################EXPERIMENTS#######################
 
 CONV_NUM: int = 2 # in linear part after upscale
-RES_NUM: int = 4
+RES_NUM: int = 8
 INPUT_SHAPE: Union[None, int]  = (None, None, 3)
 EPOCHS: int = 100
 BATCH_SIZE: int = 32

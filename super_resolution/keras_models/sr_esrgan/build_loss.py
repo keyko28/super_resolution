@@ -1,10 +1,10 @@
-from keras.applications.vgg16 import VGG16
-from keras.applications.vgg16 import preprocess_input
+from keras.applications.vgg19 import VGG19
+from keras.applications.vgg19 import preprocess_input
 import keras.backend as K
 from keras.models import Model
 import config as cfg
 import numpy as np
-# from PIL import Image
+from PIL import Image
 from keras.layers import AveragePooling2D
 from typing import Tuple, Union
 import tensorflow as tf
@@ -26,23 +26,35 @@ class Loss:
                           y_true: np.ndarray , 
                           y_pred: np.ndarray, 
                           factor: Union[int, Tuple] = 2)->Tuple[tf.Tensor]:
-        
-        y_true = np.expand_dims(y_true, axis=0)
-        y_pred = np.expand_dims(y_pred, axis=0)
 
-        y_true = preprocess_input(y_true)
-        y_pred = preprocess_input(y_pred)
+        y_pred = tf.cast(y_pred, tf.float32)
+        y_true = tf.cast(y_true, tf.float32)
+        
+        if len(y_true.shape) == 3 and len(y_pred.shape) == 3:
+        
+            # y_true = np.expand_dims(y_true, axis=0)
+            # y_pred = np.expand_dims(y_pred, axis=0)
+
+            y_true = tf.expand_dims(y_true, axis=0, name=None)
+            y_pred = tf.expand_dims(y_pred, axis=0, name=None)
+
+        # y_true = preprocess_input(y_true)
+        # y_pred = preprocess_input(y_pred)
 
         y_true = AveragePooling2D(pool_size=factor)(y_true)
         y_pred = AveragePooling2D(pool_size=factor)(y_pred)
+
+
 
         return y_true, y_pred
 
     def _compile_loss(self, y_true, y_pred):
 
+        # tf.config.run_functions_eagerly(True)
+
         y_true, y_pred = self._preprocess_image(y_true, y_pred, factor=6)
 
-        network = VGG16(include_top=self.include_top, weights=self.weights, input_shape=self.shape)
+        network = VGG19(include_top=self.include_top, weights=self.weights, input_shape=self.shape)
         network.trainable = self.trainable
 
         for layer in network.layers:
@@ -51,8 +63,11 @@ class Loss:
         model = Model(inputs = network.input, outputs=network.get_layer(self.output_layer).output)
         model.trainable = self.trainable
 
-        y_true = model.predict(y_true)
-        y_pred = model.predict(y_pred)
+        # y_true = model.predict(y_true)
+        # y_pred = model.predict(y_pred)
+
+        y_true = model(y_true)
+        y_pred = model(y_pred)
 
         return K.mean(K.square(y_true - y_pred))
 
