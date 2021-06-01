@@ -1,0 +1,2 @@
+    key = 'c6a2c45591d4973ff525042472446ca2'
+    secret = '202ffe6f387ce29b'

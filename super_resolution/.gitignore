@@ -9,4 +9,6 @@ dataset/
 weights/
 resolved_samples/
 models/
+__pycache__/
+test_images/
 *.ipynb
