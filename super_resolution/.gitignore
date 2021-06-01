@@ -4,6 +4,7 @@
 **/__pycache__
 __pycache__/
 dataset/
+**/.div2k/
 .div2k/
 weights/
 resolved_samples/
