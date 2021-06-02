@@ -1,3 +1,10 @@
+"""
+Main module which provides
+    - loading model
+    - training model
+
+"""
+
 from train import Train
 
 

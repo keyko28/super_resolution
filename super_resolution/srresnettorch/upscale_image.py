@@ -131,6 +131,5 @@ def main():
     u.upscale_image(out_path, name, 'jpg')
 
 
-
 if __name__ == '__main__':
      main()

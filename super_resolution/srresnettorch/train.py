@@ -1,8 +1,11 @@
+"""
+Module for training RSResNet
+"""
+
+
 
 import os
 import numpy as np
-import math
-import itertools
 import sys
 from numpy.core.fromnumeric import std
 import psutil
@@ -28,6 +31,11 @@ from tqdm import tqdm
 class Train:
 
     def __init__(self) -> None:
+        """
+        SRresNet and VGGLoss are loaded from related files
+        psutil is needed to calculate CPU cores
+
+        """
 
         # load SRresNet and VGG based loss
         self.srresnet = SRResNet()
@@ -69,7 +77,6 @@ class Train:
         # define ptimizer
         self.optimizer = torch.optim.Adam(self.srresnet.parameters(), lr=self.learning_rate, betas=(self.b1, self.b2))
         
-        
         self.Tensor = torch.cuda.FloatTensor if cuda else torch.Tensor
         self.step_size = None
         self.scheduler = None
@@ -79,6 +86,13 @@ class Train:
 
         
     def load_data(self, path: str) -> DataLoader:
+        """
+        Custom dataloader
+        input:
+            path - path to dataset
+        output
+            Dataloader
+        """
 
         self.dataloader = DataLoader(
             ImageDataset(
@@ -93,10 +107,18 @@ class Train:
             )
 
     def train(self):
+        """
+        function to provide training process
+        two shedulers may be choosen
+        however, steplr gave better results
+
+        """
 
         self.load_data(path=self.data_set_path)
+
         self.step_size = len(self.dataloader) * cfg.STEP_SIZE
         self.scheduler = lr_scheduler.StepLR(self.optimizer, step_size=self.step_size, gamma=self.gamma)
+
         # self.scheduler = lr_scheduler.CyclicLR(self.optimizer, 
         #                                         base_lr=self.learning_rate, 
         #                                         max_lr=self.max_lr, 
@@ -145,7 +167,15 @@ class Train:
                     
 
 
-    def _save_image(self, lr, hr, gen, batches: int) -> None:
+    def _save_image(self, 
+                    lr: torch.Tensor, 
+                    hr: torch.Tensor, 
+                    gen: torch.Tensor, 
+                    batches: int) -> None:
+        """
+        makes grid of images to compare with
+
+        """
 
         imgs_lr = nn.functional.interpolate(lr, scale_factor=self.factor)
 
